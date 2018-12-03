@@ -91,20 +91,16 @@ namespace day_three {
             Console.WriteLine (grid.Where (e => e.claimed_by > 1).Count ().ToString ());
 
             Console.WriteLine ("Solution to Part 2");
-            Console.WriteLine (Part2());
+            Console.WriteLine (Part2 ());
 
         }
 
         private static int Part2 () {
             string input = "input.txt";
 
-            int point_id = 0;
-
             string[] vals = System.IO.File.ReadAllLines (input);
 
             var grid = new Dictionary<int, Dictionary<int, int>> ();
-
-            int overlaps = 0;
 
             foreach (var line in vals) {
                 var parts = line.Split (' ');
