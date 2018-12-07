@@ -43,8 +43,8 @@ namespace day_seven
             inputs.ToList().ForEach(e => dependencies.Add((e.Split(" must be finished before step ")[0].Replace("Step ", ""), e.Split(" must be finished before step ")[1].Replace(" can begin.", ""))));
 
             var allSteps = dependencies.Select(x => x.pre).Concat(dependencies.Select(x => x.post)).Distinct().OrderBy(x => x).ToList();
-            
-            var workers = new List<int>(5) { 0, 0,0,0,0 };
+
+            var workers = new List<int>(5) { 0, 0, 0, 0, 0 };
             var currentSecond = 0;
             var doneList = new List<(string step, int finish)>();
 
