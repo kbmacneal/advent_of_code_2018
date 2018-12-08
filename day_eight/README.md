@@ -1,0 +1,1 @@
+I found the instructions very opaqe, and used the solution found at https://www.reddit.com/r/adventofcode/comments/a47ubw/2018_day_8_solutions/ebc87sp/ . I will definitely be studying this one, I got very confused.
