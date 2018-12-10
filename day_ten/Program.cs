@@ -6,56 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace day_ten
 {
-    public class point
-    {
-        public int x { get; set; }
-        public int y { get; set; }
-        public velocity v { get; set; }
-
-        public void Step()
-        {
-            x += this.v.d_x;
-            y += this.v.d_y;
-        }
-    }
-    public class velocity
-    {
-        public int d_x { get; set; }
-        public int d_y { get; set; }
-    }
     class Program
     {
         static void Main(string[] args)
         {
-            var contents = System.IO.File.ReadAllLines("input.txt");
-
-            List<point> points = new List<point>();
-
-            foreach (var line in contents)
-            {
-                string[] splits = line.Split(">", StringSplitOptions.RemoveEmptyEntries);
-
-                splits[0] = splits[0].Replace("position=<", "");
-
-                splits[1] = splits[1].Replace("velocity=<", "");
-
-                point p = new point()
-                {
-                    x = Int32.Parse(splits[0].Split(",")[0].Trim()),
-                    y = Int32.Parse(splits[0].Split(",")[1].Trim()),
-                    v = new velocity()
-                    {
-                        d_x = Int32.Parse(splits[1].Split(",")[0].Trim()),
-                        d_y = Int32.Parse(splits[1].Split(",")[1].Trim())
-                    }
-                };
-
-                points.Add(p);
-            }
-
-
             Parts();
-
         }
 
         public static void Parts()
