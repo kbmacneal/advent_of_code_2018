@@ -54,11 +54,11 @@ namespace day_ten
             }
 
 
-            Part1();
+            Parts();
 
         }
 
-        public static void Part1()
+        public static void Parts()
         {
             var regex = new Regex(@"position=<\s?(-?\d+), \s?(-?\d+)> velocity=<\s?(-?\d+), \s?(-?\d+)>");
             var points = System.IO.File.ReadAllLines("input.txt")
@@ -88,8 +88,8 @@ namespace day_ten
                 var newMinY = points.Min(x => x.posy);
                 var newMaxX = points.Max(x => x.posx);
                 var newMaxY = points.Max(x => x.posy);
-                if ((newMaxX - newMinX) > (maxX - minX) ||
-                    (newMaxY - newMinY) > (maxY - minY))
+                //if there the x dimension or y dimension has increased, that means that we have past the point of convergence (which you could think of as the global minimum distance between all points) so we must have our answer?
+                if ((newMaxX - newMinX) > (maxX - minX) || (newMaxY - newMinY) > (maxY - minY))
                 {
                     Console.WriteLine(seconds);
                     for (var i = minY; i <= maxY; i++)
