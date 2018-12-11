@@ -29,6 +29,7 @@ namespace day_eleven
         {
             public fuel_cell top_left { get; set; }
             public int total_power { get; set; }
+            public int size {get;set;}
 
             public override string ToString()
             {
@@ -73,7 +74,8 @@ namespace day_eleven
                 {
                     max_result = new result(){
                         top_left = cell,
-                        total_power = temp
+                        total_power = temp,
+                        size=3
                     };
                     max_power = temp;
                 }
@@ -93,6 +95,7 @@ namespace day_eleven
                         {
                             top_left = cell,
                             total_power = part_2
+                            size = i
                         };
                         max_power_part_two = part_2;
                     }
