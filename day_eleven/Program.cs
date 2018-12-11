@@ -94,7 +94,7 @@ namespace day_eleven
                         max_part_two = new result()
                         {
                             top_left = cell,
-                            total_power = part_2
+                            total_power = part_2,
                             size = i
                         };
                         max_power_part_two = part_2;
