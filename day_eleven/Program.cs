@@ -70,10 +70,10 @@ namespace day_eleven
                 return result;
             });
             result res_one = task1.Result;
-            result res_two = task2.Result;
-
             Console.WriteLine("Part 1");
             Console.WriteLine(res_one.ToString());
+
+            result res_two = task2.Result;            
             Console.WriteLine("Part 2");
             Console.WriteLine(res_two.ToString());
         }
