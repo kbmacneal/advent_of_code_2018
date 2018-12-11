@@ -78,6 +78,28 @@ namespace day_eleven
             Console.WriteLine(res_two.ToString());
         }
 
+        public static result Part1(List<fuel_cell> cells)
+        {
+            int max_power = 0;
+            result max_result = new result();
+            foreach (var cell in cells)
+            {
+                var temp = get_three_by_three_power_rating(cell, cells, 3).GetAwaiter().GetResult();
+
+                if (temp > max_power)
+                {
+                    max_result = new result()
+                    {
+                        top_left = cell,
+                        total_power = temp,
+                        size = 3
+                    };
+                    max_power = temp;
+                }
+            }
+            return max_result;
+        }
+
         public static result Part2(List<fuel_cell> cells)
         {
             int max_power_part_two = 0;
@@ -108,28 +130,6 @@ namespace day_eleven
             }
 
             return max_part_two;
-        }
-
-        public static result Part1(List<fuel_cell> cells)
-        {
-            int max_power = 0;
-            result max_result = new result();
-            foreach (var cell in cells)
-            {
-                var temp = get_three_by_three_power_rating(cell, cells, 3).GetAwaiter().GetResult();
-
-                if (temp > max_power)
-                {
-                    max_result = new result()
-                    {
-                        top_left = cell,
-                        total_power = temp,
-                        size = 3
-                    };
-                    max_power = temp;
-                }
-            }
-            return max_result;
         }
 
         public static async Task<int> get_three_by_three_power_rating(fuel_cell top_left, List<fuel_cell> grid, int search_size)
