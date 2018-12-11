@@ -79,6 +79,10 @@ namespace day_eleven
                     };
                     max_power = temp;
                 }
+            }
+
+            foreach (var cell in cells)
+            {
 
                 for (int i = 3; i < 300; i++)
                 {
