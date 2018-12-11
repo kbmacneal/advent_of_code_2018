@@ -81,6 +81,8 @@ namespace day_eleven
                 }
             }
 
+            Console.WriteLine(max_result.ToString());
+
             foreach (var cell in cells)
             {
 
@@ -108,7 +110,7 @@ namespace day_eleven
 
             }
 
-            Console.WriteLine(max_result.ToString());
+            
             //if this doesnt work, the answer is 1,1,300
             Console.WriteLine(max_part_two.ToString());
 
