@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace day_eleven
 {
@@ -55,34 +57,37 @@ namespace day_eleven
                 }
             }
 
-            int max_power = 0;
-            int max_power_part_two = 0;
-            result max_result = new result();
-            result max_part_two = new result();
-
-            foreach (var cell in cells)
+            Console.WriteLine("Starting Task 1");
+            Task<result> task1 = Task<result>.Factory.StartNew(() =>
             {
-                var temp = get_three_by_three_power_rating(cell, cells, 3);
+                var result = Part1(cells);
+                return result;
+            });
+            Console.WriteLine("Starting Task 2");
+            Task<result> task2 = Task<result>.Factory.StartNew(() =>
+            {
+                var result = Part2(cells);
+                return result;
+            });
+            result res_one = task1.Result;
+            result res_two = task2.Result;
 
-                if (temp > max_power)
-                {
-                    max_result = new result()
-                    {
-                        top_left = cell,
-                        total_power = temp,
-                        size = 3
-                    };
-                    max_power = temp;
-                }
-            }
+            Console.WriteLine("Part 1");
+            Console.WriteLine(res_one.ToString());
+            Console.WriteLine("Part 2");
+            Console.WriteLine(res_two.ToString());
+        }
 
-            Console.WriteLine(max_result.ToString());
+        public static result Part2(List<fuel_cell> cells)
+        {
+            int max_power_part_two = 0;
+            result max_part_two = new result();
 
             foreach (var cell in cells)
             {
                 for (int i = 3; i < 300; i++)
                 {
-                    var part_2 = get_three_by_three_power_rating(cell, cells, i);
+                    var part_2 = get_three_by_three_power_rating(cell, cells, i).GetAwaiter().GetResult();
 
                     if (part_2 == 0)
                     {
@@ -101,10 +106,33 @@ namespace day_eleven
                     }
                 }
             }
-            Console.WriteLine(max_part_two.ToString());
+
+            return max_part_two;
         }
 
-        public static int get_three_by_three_power_rating(fuel_cell top_left, List<fuel_cell> grid, int search_size)
+        public static result Part1(List<fuel_cell> cells)
+        {
+            int max_power = 0;
+            result max_result = new result();
+            foreach (var cell in cells)
+            {
+                var temp = get_three_by_three_power_rating(cell, cells, 3).GetAwaiter().GetResult();
+
+                if (temp > max_power)
+                {
+                    max_result = new result()
+                    {
+                        top_left = cell,
+                        total_power = temp,
+                        size = 3
+                    };
+                    max_power = temp;
+                }
+            }
+            return max_result;
+        }
+
+        public static async Task<int> get_three_by_three_power_rating(fuel_cell top_left, List<fuel_cell> grid, int search_size)
         {
             int total_power = 0;
 
