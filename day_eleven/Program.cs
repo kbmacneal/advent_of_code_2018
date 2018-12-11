@@ -68,7 +68,7 @@ namespace day_eleven
 
             foreach (var cell in cells)
             {
-                var temp = get_three_by_three_power_rating(cell,cells);
+                var temp = get_three_by_three_power_rating(cell,cells,3);
 
                 if(temp > max_power)
                 {
@@ -108,33 +108,6 @@ namespace day_eleven
             //if this doesnt work, the answer is 1,1,300
             Console.WriteLine(max_part_two.ToString());
 
-        }
-
-        public static int get_three_by_three_power_rating(fuel_cell top_left, List<fuel_cell> grid)
-        {
-            int total_power = 0;
-
-            int start_x = top_left.x;
-            int start_y = top_left.y;
-
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    var temp = grid.FirstOrDefault(e => e.x == start_x + i && e.y == start_y + j);
-
-                    if (temp != null)
-                    {
-                        total_power += temp.power_level;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-
-            return total_power;
         }
 
         public static int get_three_by_three_power_rating(fuel_cell top_left, List<fuel_cell> grid, int search_size)
