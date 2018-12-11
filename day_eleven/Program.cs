@@ -55,8 +55,6 @@ namespace day_eleven
                 }
             }
 
-            // List<fuel_cell> test = cells.Where(e=>e.power_level <=0).ToList();
-
             int max_power = 0;
             int max_power_part_two = 0;
             result max_result = new result();
@@ -103,7 +101,6 @@ namespace day_eleven
                     }
                 }
             }
-            //if this doesnt work, the answer is 1,1,300
             Console.WriteLine(max_part_two.ToString());
         }
 
@@ -130,7 +127,6 @@ namespace day_eleven
                     }
                 }
             }
-
             return total_power;
         }
     }
