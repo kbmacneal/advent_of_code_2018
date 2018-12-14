@@ -13,8 +13,6 @@ namespace day_fourteen
             var string_input = "030121";
             var input = Int32.Parse(string_input);
 
-            // var input = 9;
-
             List<int> scoreboard = new List<int> { 3, 7 };
 
             var first = 0;
@@ -22,7 +20,6 @@ namespace day_fourteen
 
             int part_two;
 
-            // while (scoreboard.Count() < input + 10)
             while (true)
             {
                 var s = new string(scoreboard.Skip(scoreboard.Count - string_input.Length - 1).Select(x => x.ToString()[0]).ToArray());
