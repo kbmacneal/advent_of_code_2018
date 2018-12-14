@@ -10,7 +10,8 @@ namespace day_fourteen
     {
         static void Main(string[] args)
         {
-            var input = Int32.Parse("030121");
+            var string_input = "030121";
+            var input = Int32.Parse(string_input);
 
             // var input = 9;
 
@@ -19,8 +20,20 @@ namespace day_fourteen
             var first = 0;
             var second = 1;
 
-            while (scoreboard.Count() < input + 10)
+            int part_two;
+
+            // while (scoreboard.Count() < input + 10)
+            while (true)
             {
+                var s = new string(scoreboard.Skip(scoreboard.Count - string_input.Length - 1).Select(x => x.ToString()[0]).ToArray());
+
+                if (s.Contains(string_input))
+                {
+                    s = new string(scoreboard.Select(x => x.ToString()[0]).ToArray());
+                    part_two = s.IndexOf(string_input);
+                    break;
+                }
+
                 var sum = scoreboard[first] + scoreboard[second];
                 if (sum >= 10)
                 {
@@ -37,41 +50,8 @@ namespace day_fourteen
             }
             Console.WriteLine();
 
-            Part2();
+            Console.WriteLine(part_two);
         }
 
-        public static void Part2()
-        {
-            var recipes = new List<int> { 3, 7 };
-            var Input = "030121";
-            var first = 0;
-            var second = 1;
-            while (true)
-            {
-                var s = new string(recipes.Skip(recipes.Count - Input.Length - 1).Select(x => x.ToString()[0]).ToArray());
-
-                if (s.Contains(Input))
-                {
-                    s = new string(recipes.Select(x => x.ToString()[0]).ToArray());
-                    Console.WriteLine(s.IndexOf(Input));
-                    break;
-                }
-
-                var sum = recipes[first] + recipes[second];
-
-                if (sum >= 10)
-                {
-                    recipes.Add(sum / 10);
-                }
-
-                recipes.Add(sum % 10);
-
-                first = (first + recipes[first] + 1) % recipes.Count;
-                
-                second = (second + recipes[second] + 1) % recipes.Count;
-            }
-
-
-        }
     }
 }
