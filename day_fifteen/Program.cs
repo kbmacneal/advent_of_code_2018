@@ -42,8 +42,6 @@ namespace day_fifteen {
             string[] input = System.IO.File.ReadAllLines ("input.txt");
 
             List<node> nodes = new List<node> ();
-            List<occupant> elves = new List<occupant> ();
-            List<occupant> goblins = new List<occupant> ();
             bool battle_joined = true;
 
             for (int i = 0; i < input[0].Length; i++) {
@@ -67,7 +65,6 @@ namespace day_fifteen {
                             var elf = new occupant () {
                                 location = new coordinate (j, i)
                             };
-                            elves.Add (elf);
                             nodes.Add (new node () {
                                 location = new coordinate (j, i),
                                     wall = false,
@@ -78,7 +75,6 @@ namespace day_fifteen {
                             var goblin = new occupant () {
                                 location = new coordinate (j, i)
                             };
-                            goblins.Add (goblin);
                             nodes.Add (new node () {
                                 location = new coordinate (j, i),
                                     wall = false,
@@ -126,7 +122,7 @@ namespace day_fifteen {
             }
 
             foreach (var node in unvisited_set) {
-                
+
             }
 
             return shortest;
