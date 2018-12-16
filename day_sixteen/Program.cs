@@ -6,225 +6,211 @@ using System.Linq;
 
 namespace day_sixteen {
 
-    public class command {
-        public int opcode { get; set; }
-        public int a { get; set; }
-        public int b { get; set; }
-        public int c { get; set; }
+    // public class command {
+    //     public int opcode { get; set; }
+    //     public int a { get; set; }
+    //     public int b { get; set; }
+    //     public int c { get; set; }
+    // }
+    // public class input {
+    //     public int[] before_registers { get; set; }
+    //     public command command { get; set; }
+    //     public int[] after_registers { get; set; }
+    //     public List<string> possible_opcodes { get; set; } = new List<string> ();
+    // }
+
+    public class Operation {
+        public Operation (Action<int, int, int> action) {
+            Action = action;
+        }
+        public Action<int, int, int> Action { get; set; }
+        public int OpCode { get; set; } = -1;
     }
-    public class input {
-        public int[] before_registers { get; set; }
-        public command command { get; set; }
-        public int[] after_registers { get; set; }
-        public List<string> possible_opcodes { get; set; } = new List<string> ();
-    }
+
     class Program {
+        static int[] reg = new int[] { 0, 0, 0, 0 };
         static void Main (string[] args) {
-            var input = File.ReadAllText ("input.txt").Split ("\n", StringSplitOptions.RemoveEmptyEntries);
+            var ops = new List<Operation> ();
 
-            var last_index = input.ToList ().FindLastIndex (e => e.StartsWith ("After:"));
+            //addr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] + reg[b];
+            }));
+            //addi
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] + b;
+            }));
+            //mulr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] * reg[b];
+            }));
+            //muli
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] * b;
+            }));
+            //banr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] & reg[b];
+            }));
+            //bani
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] & b;
+            }));
+            //borr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] | reg[b];
+            }));
+            //bori
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] | b;
+            }));
+            //setr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a];
+            }));
+            //seti
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = a;
+            }));
+            //gtir
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = a > reg[b] ? 1 : 0;
+            }));
+            //gtri
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] > b ? 1 : 0;
+            }));
+            //gtrr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] > reg[b] ? 1 : 0;
+            }));
+            //eqir
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = a == reg[b] ? 1 : 0;
+            }));
+            //eqri
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] == b ? 1 : 0;
+            }));
+            //eqrr
+            ops.Add (new Operation ((a, b, c) => {
+                reg[c] = reg[a] == reg[b] ? 1 : 0;
+            }));
 
-            var part_one_inputs = input.AsSpan ().Slice (0, last_index);
+            var input1 = File.ReadAllLines ("input1.txt");
 
-            var part_two_inputs = input.AsSpan ().Slice (last_index);
+            var input2 = File.ReadAllLines ("input2.txt");
 
-            List<input> inputs = new List<input> ();
+            int three_or_more = 0;
 
-            while (part_one_inputs.ToArray ().Length > 0) {
-                var instruction = part_one_inputs.ToArray ().ToList ().Take (3);
-
-                input i = new input ();
-
-                i.before_registers = instruction.ToArray () [0].Replace ("Before: [", "").Replace ("]", "").Split (", ").ToList ().Select (e => Int32.Parse (e)).ToArray ();
-
-                var split = instruction.ToArray () [1].Split (" ").Select (e => Int32.Parse (e)).ToArray ();
-
-                command reg = new command () {
-                    opcode = split[0],
-                    a = split[1],
-                    b = split[2],
-                    c = split[3]
+            for (int i = 0; i < input1.Length; i += 4) {
+                var bf = input1[i];
+                var before = new int[] {
+                    int.Parse (bf.Substring (9, 1)),
+                    int.Parse (bf.Substring (12, 1)),
+                    int.Parse (bf.Substring (15, 1)),
+                    int.Parse (bf.Substring (18, 1))
                 };
+                var af = input1[i + 2];
+                var after = new int[] {
+                    int.Parse (af.Substring (9, 1)),
+                    int.Parse (af.Substring (12, 1)),
+                    int.Parse (af.Substring (15, 1)),
+                    int.Parse (af.Substring (18, 1))
+                };
+                var p = input1[i + 1].Split (' ');
+                var o = int.Parse (p[0]);
+                var a = int.Parse (p[1]);
+                var b = int.Parse (p[2]);
+                var c = int.Parse (p[3]);
 
-                i.command = reg;
+                var matches = FindOpCodes (ops, before, a, b, c, o, after);
 
-                i.after_registers = instruction.ToArray () [2].Replace ("After:  [", "").Replace ("]", "").Split (", ").ToList ().Select (e => Int32.Parse (e)).ToArray ();
-
-                inputs.Add (i);
-
-                part_one_inputs.ToArray ().ToList ().RemoveRange (0, 3);
+                if (matches > 2) three_or_more++;
             }
 
-            string[] operations = new string[] {
-                "addr",
-                "addi",
-                "mulr",
-                "muli",
-                "banr",
-                "bani",
-                "borr",
-                "bori",
-                "setr",
-                "seti",
-                "gtir",
-                "gtri",
-                "gtrr",
-                "eqir",
-                "eqri",
-                "eqrr"
-            };
+            Console.WriteLine (three_or_more);
 
-            int part_one_count = 0;
+            reg = new int[] {0,0,0,0};
 
-            foreach (var i in inputs) {
-                foreach (var op in operations) {
-                    switch (op) {
-                        case "addr":
-                            if (i.after_registers[i.command.c] == i.before_registers[i.command.a] + i.before_registers[i.command.b]) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "addi":
-                            if (i.after_registers[i.command.c] == i.before_registers[i.command.a] + i.command.b) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "mulr":
-                            if (i.after_registers[i.command.c] == i.before_registers[i.command.a] * i.before_registers[i.command.b]) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "muli":
-                            if (i.after_registers[i.command.c] == i.before_registers[i.command.a] * i.command.b) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "banr":
-                            if (i.after_registers[i.command.c] == (i.before_registers[i.command.a] & i.before_registers[i.command.b])) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "bani":
-                            if (i.after_registers[i.command.c] == (i.before_registers[i.command.a] & i.command.b)) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "borr":
-                            if (i.after_registers[i.command.c] == (i.before_registers[i.command.a] | i.before_registers[i.command.b])) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "bori":
-                            if (i.after_registers[i.command.c] == (i.before_registers[i.command.a] | i.command.b)) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "setr":
-                            if (i.after_registers[i.command.c] == i.before_registers[i.command.a]) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "seti":
-                            if (i.after_registers[i.command.c] == i.command.a) {
-                                part_one_count++;
-                                i.possible_opcodes.Add (op);
-                            }
-                            break;
-                        case "gtir":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.command.a > i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.command.a <= i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        case "gtri":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.before_registers[i.command.a] > i.command.b) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.before_registers[i.command.a] <= i.command.b) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        case "gtrr":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.before_registers[i.command.a] > i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.before_registers[i.command.a] <= i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        case "eqir":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.command.a == i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.command.a != i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        case "eqri":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.before_registers[i.command.a] == i.command.b) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.before_registers[i.command.a] != i.command.b) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        case "eqrr":
-                            if (i.after_registers[i.command.c] == 1) {
-                                if (i.before_registers[i.command.a] == i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            } else if (i.after_registers[i.command.c] == 0) {
-                                if (i.before_registers[i.command.a] != i.before_registers[i.command.b]) {
-                                    part_one_count++;
-                                    i.possible_opcodes.Add (op);
-                                }
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+            for (int i = 0; i < input1.Length; i += 4) {
+                var bf = input1[i];
+                var before = new int[] {
+                    int.Parse (bf.Substring (9, 1)),
+                    int.Parse (bf.Substring (12, 1)),
+                    int.Parse (bf.Substring (15, 1)),
+                    int.Parse (bf.Substring (18, 1))
+                };
+                var af = input1[i + 2];
+                var after = new int[] {
+                    int.Parse (af.Substring (9, 1)),
+                    int.Parse (af.Substring (12, 1)),
+                    int.Parse (af.Substring (15, 1)),
+                    int.Parse (af.Substring (18, 1))
+                };
+                var p = input1[i + 1].Split (' ');
+                var o = int.Parse (p[0]);
+                var a = int.Parse (p[1]);
+                var b = int.Parse (p[2]);
+                var c = int.Parse (p[3]);
+
+                MatchOperations (ops, before, a, b, c, o, after);
+            }
+            
+            foreach (var line in input2)
+            {
+                var inputs = line.Split(' ');
+                var o = int.Parse(inputs[0]);
+                var a = int.Parse(inputs[1]);
+                var b = int.Parse(inputs[2]);
+                var c = int.Parse(inputs[3]);
+                var op = ops.First(x => x.OpCode == o);
+                op.Action(a,b,c);
+            }
+
+            Console.WriteLine(reg[0]);
+
+        }
+
+        static int FindOpCodes(
+            List<Operation> ops, 
+            int[] before, 
+            int a, int b, int c, int opCode,
+            int[] after)
+        {
+            var count = 0;
+            Operation lastMatch = new Operation(null); 
+            ops.Where(x => x.OpCode == -1).ToList().ForEach(op =>
+            {
+                reg = (int[])before.Clone();
+                op.Action(a, b, c);
+                if (reg.SequenceEqual(after)) { 
+                    count++;
+                    lastMatch = op;
                 }
+            });
+            return count;
+        }
+
+        static int MatchOperations (
+            List<Operation> ops,
+            int[] before,
+            int a, int b, int c, int opCode,
+            int[] after) {
+            var count = 0;
+            Operation lastMatch = new Operation (null);
+            ops.Where (x => x.OpCode == -1).ToList ().ForEach (op => {
+                reg = (int[]) before.Clone ();
+                op.Action (a, b, c);
+                if (reg.SequenceEqual (after)) {
+                    count++;
+                    lastMatch = op;
+                }
+            });
+            if (count == 1) {
+                lastMatch.OpCode = opCode;
             }
-
-            Console.WriteLine(inputs.Where(e=>e.possible_opcodes.Count() >2).Count());
-
+            return count;
         }
     }
 }
