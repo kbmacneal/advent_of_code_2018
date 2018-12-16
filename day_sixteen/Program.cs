@@ -6,19 +6,6 @@ using System.Linq;
 
 namespace day_sixteen {
 
-    // public class command {
-    //     public int opcode { get; set; }
-    //     public int a { get; set; }
-    //     public int b { get; set; }
-    //     public int c { get; set; }
-    // }
-    // public class input {
-    //     public int[] before_registers { get; set; }
-    //     public command command { get; set; }
-    //     public int[] after_registers { get; set; }
-    //     public List<string> possible_opcodes { get; set; } = new List<string> ();
-    // }
-
     public class Operation {
         public Operation (Action<int, int, int> action) {
             Action = action;
