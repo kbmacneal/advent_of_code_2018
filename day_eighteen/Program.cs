@@ -103,9 +103,11 @@ namespace day_eighteen
             // }
 
             period = 28;
-
+            
+            //0-index-shifted target - # of elements before stabilization mod the period
             var part2 = ((1000000000-1) - 406) % period;
 
+            //period - the above gets you the index of the number at the billionth position relative to the list of repeating elements
             Console.WriteLine(File.ReadAllLines("rvs.txt")[period - part2]);
 
         }
