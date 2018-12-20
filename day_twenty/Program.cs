@@ -1,125 +1,205 @@
 ﻿using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Text;
 
-namespace day_twenty
-{
-    public class room
-    {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int depth { get; set; }
+namespace day_twenty {
 
-        public room(int x, int y)
+    class Program {
+        
+        public static void Main(string[] args)
         {
-            this.x = x;
-            this.y = y;
+            var input = System.IO.File.ReadAllLines("input.txt")[0].Substring(1);
+            Console.WriteLine(PartOne(input));
+            Console.WriteLine(PartTwo(input));
+
         }
 
-        public room() { }
+        public static int PartOne(string input) {
+            var grid = Positions(input).ToList().GroupBy(x => x.fromPos).ToDictionary(x => x.Key, x => x.Select(y => y.toPos).ToList());
 
-        public room(int x, int y, int depth)
-        {
-            this.x = x;
-            this.y = y;
-            this.depth = depth;
-        }
-
-    }
-    class Program
-    {
-        static string[] directions = new string[] { "N", "E", "S", "W" };
-
-        static void Main(string[] args)
-        {
-            var input = File.ReadAllLines("input.txt")[0];
-
-            List<room> rooms = new List<room>();
-
-            int x = 0;
-            int y = 0;
-
-            var origin = new room(x, y);
-
-            rooms.Add(origin);
-
-            int prev_x = x;
-            int prev_y = y;
-
-            
-
-            var depth = 0;
-
-
-            traverse(input.Substring(1),rooms,origin,0);
-        }
-
-        public static object traverse(string instructions, List<room> rooms, room origin, int depth)
-        {
-            int x = origin.x;
-            int y = origin.y;
-
-            foreach (var item in instructions.Split(""))
-            {
-                if (directions.Contains(item))
-                {
-                    switch (item)
-                    {
-                        case "N":
-                            y++;
-                            break;
-                        case "S":
-                            y--;
-                            break;
-                        case "E":
-                            x++;
-                            break;
-                        case "W":
-                            x--;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (rooms.Where(e => e.x == x && e.y == y).Count() > 0)
-                    {
-                        rooms.First(e => e.x == x && e.y == y).depth = depth;
-                    }
-                    else
-                    {
-                        depth++;
-                        rooms.Add(new room(x, y, depth));
-                    }
-
+            var q = new Queue<((int x, int y) pos, int d)>();
+            q.Enqueue(((0, 0), 0));
+            var seen = new HashSet<(int x, int y)>();
+            var dMax = int.MinValue;
+            while (q.Any()) {
+                var (pos, d) = q.Dequeue();
+                if (seen.Contains(pos)) {
+                    continue;
                 }
-                else if (item == "|")
-                {
-                    x = origin.x; y = origin.y; depth = 0;
+                dMax = Math.Max(dMax, d);
 
-                }
-                else if (item == "(")
-                {
-                    traverse(instructions,rooms,new room(x,y),depth);
-                }
-                else if(item == ")")
-                {
-                    return null; 
-                }
-                else if(item == "$")
-                {
-                    return rooms;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid Char: " + item);
-                    return null; 
+                seen.Add(pos);
+                foreach (var nextPos in grid[pos]) {
+                    q.Enqueue((nextPos, d + 1));
                 }
             }
 
-            return rooms.Max(e=>e.depth);
+            return dMax;
+        }
 
+        public static IEnumerable<((int x, int y) fromPos, (int x, int y) toPos)> Positions(string input){
+            var ich = 0;
+            var p = ParseSeq(input, ref ich);
+            return p.Traverse((0,0), ((int x, int y) pos) => { return Enumerable.Empty<((int x, int y) posFrom, (int x, int y) posTo)>();});
+        }
+
+        public static int PartTwo(string input) {
+            var grid = Positions(input).ToList().GroupBy(x => x.fromPos).ToDictionary(x => x.Key, x => x.Select(y => y.toPos).ToList());
+
+
+            var q = new Queue<((int x, int y) pos, int d)>();
+            q.Enqueue(((0, 0), 0));
+            var seen = new HashSet<(int x, int y)>();
+            var res = 0;
+            while (q.Any()) {
+                var (pos, d) = q.Dequeue();
+                if (seen.Contains(pos)) {
+                    continue;
+                }
+                if(d >= 1000){
+                    res ++;
+                }
+
+                seen.Add(pos);
+                foreach (var nextPos in grid[pos]) {
+                    q.Enqueue((nextPos, d + 1));
+                }
+            }
+
+            return res;
+        }
+
+
+        public static Node ParseSeq(string input, ref int ich) {
+            var nodes = new List<Node>();
+            while (ich < input.Length) {
+                var ch = input[ich];
+                switch (ch) {
+                    case '^':
+                        ich++;
+                        break;
+                    case '(':
+                        nodes.Add(ParseAlt(input, ref ich));
+                        break;
+                    case '|':
+                    case ')':
+                    case '$':
+                        return new Seq { nodes = nodes.ToArray() };
+                    default:
+                        nodes.Add(ParseLiteral(input, ref ich));
+                        break;
+                }
+            }
+            throw new Exception();
+        }
+
+        public static Node ParseAlt(string input, ref int ich) {
+            ich++;
+            var nodes = new List<Node>();
+            while (ich < input.Length) {
+                nodes.Add(ParseSeq(input, ref ich));
+                if(input[ich] == ')'){
+                    ich++;
+                    break;
+                } else {
+                    ich++;
+                }
+            }
+            return new Alt{nodes=nodes.ToArray()};
+        }
+
+        public static Node ParseLiteral(string input, ref int ich) {
+            var sb = new StringBuilder();
+            while (ich < input.Length) {
+                var ch = input[ich];
+                switch (ch) {
+                    case 'E':
+                    case 'S':
+                    case 'W':
+                    case 'N':
+                        sb.Append(ch);
+                        ich++;
+                        break;
+                    default:
+                        return new Literal { st = sb.ToString() };
+                }
+            }
+            throw new Exception();
+        }
+
+    }
+
+    abstract class Node {
+        public abstract IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)> Traverse((int x, int y) pos,
+            Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>> cont);
+    }
+
+    class Literal : Node {
+        public string st;
+
+        static Dictionary<char, (int dx, int dy)> step = new Dictionary<char, (int dx, int dy)>{
+            {'N',(0, -1)},
+            {'E',(1,0)},
+            {'W',(-1, 0)},
+            {'S',(0, 1)},
+        };
+
+        public override IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)> Traverse((int x, int y) pos,
+            Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>> cont
+        ) {
+            foreach (var ch in st) {
+                switch (ch) {
+                    case 'E':
+                    case 'N':
+                    case 'W':
+                    case 'S':
+                        var posNew = (pos.x + step[ch].dx, pos.y + step[ch].dy);
+                        yield return (pos, posNew);
+                        yield return (posNew, pos);
+                        pos = posNew;
+                        break;
+                }
+            }
+
+            foreach (var next in cont(pos))
+                yield return next;
+        }
+    }
+
+    class Seq : Node {
+        public Node[] nodes;
+        public override IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)> Traverse(
+            (int x, int y) pos,
+            Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>> cont
+        ) {
+            Func<int, Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>>> step = null;
+            step = (int i) => {
+                if (i == nodes.Length)
+                    return cont;
+
+                return (posT) => nodes[i].Traverse(posT, step(i + 1));
+            };
+            return step(0)(pos);
+        }
+    }
+
+    class Alt : Node {
+        public Node[] nodes;
+        public override IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)> Traverse(
+            (int x, int y) pos,
+            Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>> cont
+        ) {
+            Func<int, Func<(int x, int y), IEnumerable<((int x, int y) posFrom, (int x, int y) posTo)>>> step = null;
+            step = (int i) => {
+                if (i == nodes.Length)
+                    return cont;
+
+                return (posT) => nodes[i].Traverse(pos, step(i + 1));
+            };
+            return step(0)(pos);
         }
     }
 }
