@@ -1,0 +1,1 @@
+facscinating solution from https://www.reddit.com/r/adventofcode/comments/a86jgt/2018_day_21_solutions/ec8tlb7/ that removes the need to reverse engineer the inputs
